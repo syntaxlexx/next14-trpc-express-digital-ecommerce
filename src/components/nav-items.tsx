@@ -1,7 +1,7 @@
 "use client";
 
 import { PRODUCT_CATEGORIES } from "@/config";
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import NavItem from "./nav-item";
 import { useOnClickOutside } from "@/hooks/use-on-click-outside";
 
@@ -9,6 +9,20 @@ interface Props {}
 
 const NavItems: FC<Props> = ({}) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setActiveIndex(null);
+      }
+    };
+
+    document.addEventListener("keydown", handler);
+
+    return () => {
+      document.removeEventListener("keydown", handler);
+    };
+  }, []);
 
   const isAnyOpen = activeIndex !== null;
 
