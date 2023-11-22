@@ -13,7 +13,7 @@ import { trpc } from "@/trpc/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FC } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,7 +22,18 @@ import { ZodError } from "zod";
 interface Props {}
 
 const Page: FC<Props> = ({}) => {
+  const searchParams = useSearchParams();
   const router = useRouter();
+  const isSeller = searchParams.get("as") === "seller";
+  const origin = searchParams.get("origin");
+
+  const continueAsSeller = () => {
+    router.push(`?as=seller`);
+  };
+
+  const continueAsBuyer = () => {
+    router.replace(`/sign-in`, undefined);
+  };
 
   const {
     register,
@@ -32,10 +43,10 @@ const Page: FC<Props> = ({}) => {
     resolver: zodResolver(AuthCredentialsValidator),
   });
 
-  const { mutate, isPending } = trpc.auth.createPayloadUser.useMutation({
+  const { mutate: signIn, isPending } = trpc.auth.signIn.useMutation({
     onError: (err) => {
-      if (err.data?.code === "CONFLICT") {
-        toast.error("This email is already in use. Sign in instead?");
+      if (err.data?.code === "UNAUTHORIZED") {
+        toast.error("Invalid email/password");
         return;
       }
 
@@ -44,16 +55,28 @@ const Page: FC<Props> = ({}) => {
         return;
       }
 
-      toast.error("Soemthing went wrong. Please try again.");
+      toast.error("Something went wrong. Please try again.");
     },
-    onSuccess: ({ sentToEmail }) => {
-      toast.success(`Verification email sent to ${sentToEmail}`);
-      router.push(`/verify-email?to=${sentToEmail}`);
+    onSuccess: ({}) => {
+      toast.success(`Signed in successfully`);
+      router.refresh();
+
+      if (origin) {
+        router.push(`/${origin}`);
+        return;
+      }
+
+      if (isSeller) {
+        router.push(`/sell`);
+        return;
+      }
+
+      router.push(`/`);
     },
   });
 
   const onSubmit = ({ email, password }: TAuthCredentialsValidator) => {
-    mutate({ email, password });
+    signIn({ email, password });
   };
 
   return (
@@ -61,7 +84,9 @@ const Page: FC<Props> = ({}) => {
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
         <div className="flex flex-col items-center space-y-2 text-center">
           <Icons.logo className="h-20 w-20" />
-          <h1 className="text-2xl font-bold">Sign in to your account</h1>
+          <h1 className="text-2xl font-bold">
+            Sign in to your {isSeller ? "seller" : ""} account
+          </h1>
 
           <Link
             href={"/sign-up"}
@@ -109,9 +134,41 @@ const Page: FC<Props> = ({}) => {
                 )}
               </div>
 
-              <Button>{isPending ? "Signing up..." : "Sign up"}</Button>
+              <Button>{isPending ? "Signing in..." : "Sign in"}</Button>
             </div>
           </form>
+
+          <div className="relative">
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 flex items-center"
+            >
+              <div className="w-full border-t"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">
+                or
+              </span>
+            </div>
+          </div>
+
+          {isSeller ? (
+            <Button
+              onClick={continueAsBuyer}
+              variant="secondary"
+              disabled={isPending}
+            >
+              Continue as customer
+            </Button>
+          ) : (
+            <Button
+              onClick={continueAsSeller}
+              variant="secondary"
+              disabled={isPending}
+            >
+              Continue as seller
+            </Button>
+          )}
         </div>
       </div>
     </div>
