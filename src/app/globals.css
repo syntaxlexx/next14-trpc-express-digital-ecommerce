@@ -56,4 +56,16 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  .gradient-text {
+    color: transparent;
+    background: linear-gradient(to right, #a855f7, #ec4899, #eab308);
+    background-clip: text;
+  }
+  .animated-gradient-text {
+    color: transparent;
+    background: linear-gradient(to right, #a855f7, #ec4899, #eab308, #ec4899, #a855f7);
+    background-clip: text;
+    background-size: 300% 300%;
+  }
 }
