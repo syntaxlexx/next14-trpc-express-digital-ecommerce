@@ -58,7 +58,9 @@ const yourOwnAndPurchased: Access = async ({ req }) => {
 export const ProductFiles: CollectionConfig = {
     slug: 'product_files',
     admin: {
-        hidden: ({ user }) => user.role !== 'admin'
+        hidden: ({ user }) => user.role !== 'admin',
+        useAsTitle: "Product Files",
+        description: "All Product files"
     },
     hooks: {
         beforeChange: [
@@ -67,9 +69,9 @@ export const ProductFiles: CollectionConfig = {
     },
     access: {
         read: yourOwnAndPurchased,
+        create: ({ req }) => req.user.role === 'admin',
         update: ({ req }) => req.user.role === 'admin',
         delete: ({ req }) => req.user.role === 'admin',
-        create: ({ req }) => req.user.role === 'admin',
     },
     upload: {
         staticURL: "/product_files",
