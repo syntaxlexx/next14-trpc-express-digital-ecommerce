@@ -64,8 +64,28 @@
   }
   .animated-gradient-text {
     color: transparent;
-    background: linear-gradient(to right, #a855f7, #ec4899, #eab308, #ec4899, #a855f7);
+    background: linear-gradient(
+      to right,
+      #a855f7,
+      #ec4899,
+      #eab308,
+      #ec4899,
+      #a855f7
+    );
     background-clip: text;
     background-size: 300% 300%;
   }
+}
+
+.swiper-pagination-bullet {
+  width: 7px !important;
+  height: 7px !important;
+  background: rgba(255, 255, 255, 0.2);
+  scale: 0.9 !important;
+}
+
+.swiper-pagination-bullet-active {
+  color: #fff;
+  background: white !important;
+  scale: 1 !important;
 }

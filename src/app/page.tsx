@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowDownToLine, CheckCircle, Leaf } from "lucide-react";
+import ProductReel from "@/components/product-reel";
 
 const perks = [
   {
@@ -53,7 +54,12 @@ export default function Home() {
           </div>
         </div>
 
-        {/* TODO: list products */}
+        {/* brand new */}
+        <ProductReel
+          query={{ sort: "desc", limit: 4 }}
+          title="Brand New"
+          href="/products"
+        />
       </MaxWidthWrapper>
 
       <section className="border-t border-gray-200 bg-gray-50">
