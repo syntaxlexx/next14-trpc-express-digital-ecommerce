@@ -30,7 +30,7 @@ const Cart: FC<Props> = ({}) => {
     (total, { product }) => total + product.price,
     0
   );
-  const fee = 89;
+  const fee = 1;
 
   useEffect(() => {
     setIsMounted(true);
