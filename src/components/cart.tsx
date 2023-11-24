@@ -1,6 +1,15 @@
 "use client";
 
-import { FC } from "react";
+import { useCart } from "@/hooks/use-cart";
+import { formatPrice } from "@/lib/utils";
+import { ShoppingCartIcon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { FC, useEffect, useState } from "react";
+import CartItem from "./cart-item";
+import { buttonVariants } from "./ui/button";
+import { ScrollArea } from "./ui/scroll-area";
+import { Separator } from "./ui/separator";
 import {
   Sheet,
   SheetContent,
@@ -9,18 +18,23 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "./ui/sheet";
-import { Button, buttonVariants } from "./ui/button";
-import { ShoppingCartIcon } from "lucide-react";
-import { Separator } from "./ui/separator";
-import { formatPrice } from "@/lib/utils";
-import Link from "next/link";
-import Image from "next/image";
 
 interface Props {}
 
 const Cart: FC<Props> = ({}) => {
-  const itemCount = 0;
+  const { items } = useCart();
+  const [isMounted, setIsMounted] = useState<boolean>(false);
+
+  const itemCount = items.length;
+  const cartTotal = items.reduce(
+    (total, { product }) => total + product.price,
+    0
+  );
   const fee = 89;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <Sheet>
@@ -30,7 +44,7 @@ const Cart: FC<Props> = ({}) => {
           className="w-6 h-6 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
         />
         <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">
-          {itemCount}
+          {isMounted ? itemCount : 0}
         </span>
       </SheetTrigger>
       <SheetContent className="flex w-full flex-col pr-0 sm:max-w-lg">
@@ -41,8 +55,11 @@ const Cart: FC<Props> = ({}) => {
         {itemCount > 0 ? (
           <>
             <div className="flex w-full flex-col pr-6">
-              {/* TODO: cart logic */}
-              Cart items
+              <ScrollArea>
+                {items.map(({ product }) => (
+                  <CartItem product={product} key={product.id} />
+                ))}
+              </ScrollArea>
             </div>
 
             <div className="space-y-4 pr-6">
@@ -58,7 +75,7 @@ const Cart: FC<Props> = ({}) => {
                 </div>
                 <div className="flex">
                   <span className="flex-1">Total</span>
-                  <span className="">{formatPrice(fee * itemCount)}</span>
+                  <span className="">{formatPrice(fee + cartTotal)}</span>
                 </div>
               </div>
 
