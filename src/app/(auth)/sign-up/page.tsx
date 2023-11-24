@@ -32,7 +32,7 @@ const Page: FC<Props> = ({}) => {
     resolver: zodResolver(AuthCredentialsValidator),
   });
 
-  const { mutate, isPending } = trpc.auth.createPayloadUser.useMutation({
+  const { mutate, isLoading } = trpc.auth.createPayloadUser.useMutation({
     onError: (err) => {
       if (err.data?.code === "CONFLICT") {
         toast.error("This email is already in use. Sign in instead?");
@@ -109,7 +109,7 @@ const Page: FC<Props> = ({}) => {
                 )}
               </div>
 
-              <Button>{isPending ? "Signing up..." : "Sign up"}</Button>
+              <Button>{isLoading ? "Signing up..." : "Sign up"}</Button>
             </div>
           </form>
         </div>

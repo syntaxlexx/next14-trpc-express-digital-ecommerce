@@ -43,7 +43,7 @@ const Page: FC<Props> = ({}) => {
     resolver: zodResolver(AuthCredentialsValidator),
   });
 
-  const { mutate: signIn, isPending } = trpc.auth.signIn.useMutation({
+  const { mutate: signIn, isLoading } = trpc.auth.signIn.useMutation({
     onError: (err) => {
       if (err.data?.code === "UNAUTHORIZED") {
         toast.error("Invalid email/password");
@@ -134,7 +134,7 @@ const Page: FC<Props> = ({}) => {
                 )}
               </div>
 
-              <Button>{isPending ? "Signing in..." : "Sign in"}</Button>
+              <Button>{isLoading ? "Signing in..." : "Sign in"}</Button>
             </div>
           </form>
 
@@ -156,7 +156,7 @@ const Page: FC<Props> = ({}) => {
             <Button
               onClick={continueAsBuyer}
               variant="secondary"
-              disabled={isPending}
+              disabled={isLoading}
             >
               Continue as customer
             </Button>
@@ -164,7 +164,7 @@ const Page: FC<Props> = ({}) => {
             <Button
               onClick={continueAsSeller}
               variant="secondary"
-              disabled={isPending}
+              disabled={isLoading}
             >
               Continue as seller
             </Button>
