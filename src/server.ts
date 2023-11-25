@@ -9,6 +9,8 @@ import { IncomingMessage } from 'http'
 import { stripeWebhookHandler } from './webhooks'
 import nextBuild from 'next/dist/build'
 import path from 'path'
+import { PayloadRequest } from 'payload/types'
+import { parse } from 'url'
 
 const app = express()
 const PORT = Number(process.env.PORT) || 3000
@@ -37,6 +39,19 @@ const start = async () => {
             }
         }
     })
+
+    // protect cart page
+    const cartRouter = express.Router()
+    cartRouter.use(payload.authenticate)
+    cartRouter.get("/", (req, res) => {
+        const request = req as PayloadRequest
+        if (!request.user) return res.redirect("/sign-in?origin=cart")
+
+        const parsedUrl = parse(req.url, true)
+        return nextApp.render(req, res, "/cart", parsedUrl.query)
+    })
+
+    app.use("/cart", cartRouter) // now use the middleware we've created
 
     // build for production
     if (process.env.NEXT_BUILD) {
