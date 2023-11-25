@@ -1,3 +1,4 @@
+import { PrimaryActionEmailHtml } from "@/components/emails/primary-action-email";
 import { is } from "date-fns/locale";
 import { Access, CollectionConfig } from "payload/types";
 
@@ -16,7 +17,11 @@ export const Users: CollectionConfig = {
     auth: {
         verify: {
             generateEmailHTML: ({ token }) => {
-                return `<p>Hello pls verify. <a href="${process.env.NEXT_PUBLIC_SERVER_URL}/verify-email?token=${token}">Verify Email</a></p>`
+                return PrimaryActionEmailHtml({
+                    actionLabel: 'Verify your account',
+                    buttonText: 'Verify Account',
+                    href: `${process.env.NEXT_PUBLIC_SERVER_URL}/verify-email?token=${token}`
+                })
             }
         }
     },
