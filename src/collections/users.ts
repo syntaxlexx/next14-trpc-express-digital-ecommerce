@@ -1,5 +1,4 @@
-import { PrimaryActionEmailHtml } from "@/components/emails/primary-action-email";
-import { is } from "date-fns/locale";
+import { PrimaryActionEmailHtml } from "../components/emails/primary-action-email";
 import { Access, CollectionConfig } from "payload/types";
 
 const adminsAndUser: Access = ({ req: { user } }) => {
