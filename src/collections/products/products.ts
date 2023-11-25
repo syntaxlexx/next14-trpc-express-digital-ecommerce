@@ -1,9 +1,8 @@
-import { BeforeChangeHook } from "payload/dist/collections/config/types";
+import { BeforeChangeHook, AfterChangeHook } from "payload/dist/collections/config/types";
 import { PRODUCT_CATEGORIES } from "../../config";
 import { Access, CollectionConfig } from "payload/types";
 import { Product, User } from "../../payload-types";
 import { stripe } from "../../lib/stripe";
-import { AfterChangeHook } from "payload/dist/globals/config/types";
 
 
 const addUser: BeforeChangeHook<Product> = async ({ req, data }) => {
@@ -12,7 +11,7 @@ const addUser: BeforeChangeHook<Product> = async ({ req, data }) => {
     return { ...data, user: user.id }
 }
 
-const syncUser: AfterChangeHook = async ({ req, doc }) => {
+const syncUser: AfterChangeHook<Product> = async ({ req, doc }) => {
     const fullUser = await req.payload.findByID({
         collection: 'users',
         id: req.user.id
@@ -69,7 +68,9 @@ export const Products: CollectionConfig = {
         useAsTitle: 'name',
     },
     access: {
-        read: isAdminOrHasAccess()
+        read: isAdminOrHasAccess(),
+        update: isAdminOrHasAccess(),
+        delete: isAdminOrHasAccess(),
     },
     hooks: {
         afterChange: [syncUser],
