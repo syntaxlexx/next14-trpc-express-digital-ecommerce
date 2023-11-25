@@ -1,8 +1,9 @@
 import { BeforeChangeHook } from "payload/dist/collections/config/types";
 import { PRODUCT_CATEGORIES } from "../../config";
-import { CollectionConfig } from "payload/types";
-import { Product } from "../../payload-types";
+import { Access, CollectionConfig } from "payload/types";
+import { Product, User } from "../../payload-types";
 import { stripe } from "../../lib/stripe";
+import { AfterChangeHook } from "payload/dist/globals/config/types";
 
 
 const addUser: BeforeChangeHook<Product> = async ({ req, data }) => {
@@ -11,15 +12,67 @@ const addUser: BeforeChangeHook<Product> = async ({ req, data }) => {
     return { ...data, user: user.id }
 }
 
+const syncUser: AfterChangeHook = async ({ req, doc }) => {
+    const fullUser = await req.payload.findByID({
+        collection: 'users',
+        id: req.user.id
+    });
+
+    if (fullUser && typeof fullUser === 'object') {
+        const { products } = fullUser
+
+        const allIDs = [
+            ...(products?.map((product) => typeof product === 'object' ? product.id : product) || [])
+        ]
+
+        const createdProductIds = allIDs.filter((id, i) => allIDs.indexOf(id) === i)
+
+        const dataToUpdate = [...createdProductIds, doc.id]
+
+        await req.payload.update({
+            collection: 'users',
+            id: fullUser.id,
+            data: {
+                products: dataToUpdate,
+            }
+        })
+    }
+}
+
+const isAdminOrHasAccess = (): Access => ({ req: { user: _user } }) => {
+    const user = _user as User | undefined
+
+    if (!user) return false;
+    if (user.role === 'admin') return true;
+
+    const userProductIDs = (user.products || []).reduce<string[]>((acc, curr) => {
+        if (!curr) return acc;
+        if (typeof curr === 'string') {
+            acc.push(curr)
+        } else {
+            acc.push(curr.id)
+        }
+
+        return acc;
+    }, [])
+
+    return {
+        id: {
+            in: userProductIDs,
+        }
+    }
+}
+
 export const Products: CollectionConfig = {
     slug: 'products',
     admin: {
         useAsTitle: 'name',
     },
     access: {
-
+        read: isAdminOrHasAccess()
     },
     hooks: {
+        afterChange: [syncUser],
         beforeChange: [
             addUser,
             async (args) => {
